@@ -8,12 +8,13 @@
 #include <unistd.h>
 #include <signal.h>
 #include "read.h"
+#include "para.h"
 
 // the read process of input command
 // handles the uncompleted quote
 int getCommand(char* commandline)
 {
-    char buffer[1024];
+    char buffer[MAX_CL_LEN];
     unsigned int buffer_id = 0;
     char c;
     bool singlequoted = false, doublequoted = false;
@@ -38,12 +39,13 @@ int getCommand(char* commandline)
                 fflush(stdout);
                 buffer_id--;
             }
-            else break;
+            else {buffer_id--; break;}
         }
     }
     strcpy(commandline, buffer);
     // test for read result
     for (unsigned int i = 0; i< buffer_id;++i) printf("%c",commandline[i]);
+    printf("\n");
     fflush(stdout);
-    return 0;
+    return buffer_id;
 }
