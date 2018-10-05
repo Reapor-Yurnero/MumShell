@@ -19,8 +19,17 @@ int getCommand(char* commandline)
     char c;
     bool singlequoted = false, doublequoted = false;
     while (true) {
-        read(STDOUT_FILENO, &c, 1);
-        if ((int)c == 4) return -1; // end of transmission
+        ssize_t readrtn = read(STDOUT_FILENO, &c, 1);
+        if (readrtn == 0) {
+
+//            fflush(stdout);
+//            printf("\n");
+//            if (buffer_id == 0) {
+//                printf("\n");
+//                return -1;
+//            }
+//            else continue;
+        } // end of transmission
         else if ((int)c == 3) return -2; // end of context
         else if ((int)c == 127) // backspace
         {
@@ -44,8 +53,8 @@ int getCommand(char* commandline)
     }
     strcpy(commandline, buffer);
     // test for read result
-    for (unsigned int i = 0; i< buffer_id;++i) printf("%c",commandline[i]);
-    printf("\n");
+//    for (unsigned int i = 0; i< buffer_id;++i) printf("%c",commandline[i]);
+//    printf("\n");
     fflush(stdout);
     return buffer_id;
 }

@@ -28,8 +28,8 @@ void initprocess(process_t* p);
 int parseCommandLine(char* inputCommand, int c_len, jobs_t* jobs);
 //int parsePipe()
 int parseProcess(char* inputCommand, int c_start, int c_end, process_t* p);
-void displayjobs(jobs_t* jobs);
-void displayprocess(process_t* p);
+void displayjobs(const jobs_t* jobs);
+void displayprocess(const process_t* p);
 void freejobs(jobs_t* jobs);
 void freeprocess(process_t* p);
 

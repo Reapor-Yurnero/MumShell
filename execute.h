@@ -5,5 +5,11 @@
 #ifndef PROJECT_EXECUTE_H
 #define PROJECT_EXECUTE_H
 
+#include "parse.h"
+#include "para.h"
+
+int executejobs(jobs_t* jobs);
+
+int executeprocess(const process_t* p, int in, int out, int* fd);
 
 #endif //PROJECT_EXECUTE_H
