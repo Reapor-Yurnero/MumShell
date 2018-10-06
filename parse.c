@@ -96,20 +96,20 @@ int parseProcess(char* inputCommand, int c_start, int c_end, process_t* p)
                 continue;
             }
             else if (c == '<') {
-                if (i == c_start) {
-                    perror("syntax error near unexpected token `newline'");
-                    return -1;
-                }
+//                if (i == c_start) {
+//                    perror("syntax error near unexpected token `newline'");
+//                    return -1;
+//                }
                 p->inMode = FILEIN;
                 ifilenotfound = true;
                 ifiledes &= false; p->inFile[ifname_id] = '\0';
                 ofiledes &= false; p->outFile[ofname_id] = '\0';
             }
             else if (c == '>') {
-                if (i == c_start) {
-                    perror("syntax error near unexpected token `newline'");
-                    return -1;
-                }
+//                if (i == c_start) {
+//                    perror("syntax error near unexpected token `newline'");
+//                    return -1;
+//                }
                 if (i != c_end-1 && inputCommand[i+1] == '>')
                 {p->outMode = FILEAPPEND;++i;}
                 else p->outMode = FILEOUT;
@@ -140,6 +140,10 @@ int parseProcess(char* inputCommand, int c_start, int c_end, process_t* p)
                 ifiledes &= false; p->inFile[ifname_id] = '\0';
                 ofiledes &= false; p->outFile[ofname_id] = '\0';
                 p->argv[p->argc-1][argv_id] = '\0';
+                if (ifilenotfound || ofilenotfound) {
+                    perror("syntax error near unexpected token `newline'");
+                    return -1;
+                }
             }
         }
         else { // quoted
