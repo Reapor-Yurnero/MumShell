@@ -14,7 +14,7 @@
 // handles the uncompleted quote
 int getCommand(char* commandline)
 {
-    char buffer[MAX_CL_LEN];
+    char buffer[MAX_CL_LEN] = {0};
     unsigned int buffer_id = 0;
     int c;
     bool singlequoted = false, doublequoted = false;

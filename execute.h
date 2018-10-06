@@ -10,6 +10,6 @@
 
 int executejobs(jobs_t* jobs);
 
-int executeprocess(const process_t* p, int in, int out, int* fd, int pnum);
+int executeprocess(const process_t* p, int in, int out, int* fd, jobs_t* jobs);
 
 #endif //PROJECT_EXECUTE_H

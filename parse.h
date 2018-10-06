@@ -14,6 +14,8 @@ struct process_t {
     char* argv[MAX_ARG_NUM];
     char* inFile;
     char* outFile;
+    char* bak;
+    int null_id;
     enum IOMode inMode;
     enum IOMode outMode;
 };

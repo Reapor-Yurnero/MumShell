@@ -23,7 +23,7 @@ int main()
     struct sigaction sa;
     memset(&sa, 0, sizeof(struct sigaction));
     sa.sa_handler = sigHandler;
-    sa.sa_flags = 0;// not SA_RESTART!;
+    sa.sa_flags = 0;// not SA_RESTART! in this case, getchar will throw error
 
     sigaction(SIGINT, &sa, NULL);
     sigaction(SIGTERM, &sa, NULL);
@@ -47,7 +47,7 @@ int main()
         // displayjobs(&jobs);
         // printf("=======================\n");
         rtn = executejobs(&jobs);
-        if (rtn == -100) {printf("exit\n");exit(0);}
+        if (rtn == -100) {freejobs(&jobs);printf("exit\n");exit(0);}
         //else if (rtn < 0) continue;
         freejobs(&jobs);
         //break;

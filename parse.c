@@ -10,14 +10,13 @@
 #include "parse.h"
 
 void initprocess(process_t* p) {
+    //printf("initprocess!\n");
     p->argc=0;
     p->inMode = STDIN;
     p->outMode = STDOUT;
     for (int i = 0; i < MAX_ARG_NUM;++i) p->argv[i]=(char*)malloc(MAX_ARG_LEN);
     p->inFile = (char*)malloc(MAX_ARG_LEN);
-    //p->inFile = "nofile";
     p->outFile = (char*)malloc(MAX_ARG_LEN);
-    //p->outFile = "nofile";
 }
 
 int parseCommandLine(char* inputCommand, int c_len, jobs_t* jobs)
@@ -41,24 +40,26 @@ int parseCommandLine(char* inputCommand, int c_len, jobs_t* jobs)
             else {
                 c_start = (c_end ==0 )? c_end:c_end+1;
                 c_end = i;
+                //printf("init process[%d]\n", jobs->p_num);
                 initprocess(&jobs->process[jobs->p_num]);
                 //printf("%d %d\n",c_start,c_end);
                 int rtn = parseProcess(inputCommand,c_start,c_end,&jobs->process[jobs->p_num]);
-                if (rtn < 0) return -1;
                 jobs->p_num++;
+                if (rtn < 0) return -1;
             }
         }
         else if (!quoted && i == c_len-1) {
             c_start = (c_end ==0 )? c_end:c_end+1;
             c_end = i+1;
+            //printf("init process[%d]\n", jobs->p_num);
             initprocess(&jobs->process[jobs->p_num]);
             //printf("%d %d\n",c_start,c_end);
             int rtn = parseProcess(inputCommand,c_start,c_end,&jobs->process[jobs->p_num]);
-            if (rtn < 0) return -1;
             jobs->p_num++;
+            if (rtn < 0) return -1;
         }
     }
-    return 0;
+    return jobs->p_num;
 }
 
 int parseProcess(char* inputCommand, int c_start, int c_end, process_t* p)
@@ -157,7 +158,9 @@ int parseProcess(char* inputCommand, int c_start, int c_end, process_t* p)
             }
         }
     }
+    p->bak = p->argv[p->argc];
     p->argv[p->argc] = NULL;
+    p->null_id = p->argc;
     return 0;
 }
 
@@ -186,13 +189,17 @@ void displayprocess(const process_t* p) {
 }
 
 void freejobs(jobs_t* jobs) {
+    //printf("%d\n",jobs->p_num);
     for (int i = 0;i < jobs->p_num;++i) {
+        //printf("free process[%d]\n", i);
         freeprocess(&jobs->process[i]);
     }
 }
 
 void freeprocess(process_t* p) {
-    for (int i = 0; i < MAX_ARG_NUM;++i) free(p->argv[i]);
+    //printf("freeprocess!\n");
+    if (p->argv[p->null_id] == NULL) p->argv[p->null_id] = p->bak;
+    for (int i = 0;i < MAX_ARG_NUM;++i) free(p->argv[i]);
     free(p->inFile);
     free(p->outFile);
 }
