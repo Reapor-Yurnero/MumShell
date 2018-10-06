@@ -22,15 +22,23 @@ int getCommand(char* commandline)
         //ssize_t readrtn = read(STDOUT_FILENO, &c, 1);
         c = getchar();
         if ((int)c == EOF) {
+            if (feof(stdin)) {
+                if (buffer_id == 0) {
+                    //printf("\n");
+                    return -1;
+                }
+                else continue;
+            }
+            else if(ferror(stdin)) return -2;
 //            fflush(stdout);
             //printf("EOF\n");
-            if (buffer_id == 0) {
-                printf("\n");
-                return -1;
-            }
-            else continue;
+//            if (buffer_id == 0) {
+//                printf("\n");
+//                return -1;
+//            }
+//            else continue;
         } // end of transmission
-        else if ((int)c == 3) return -2; // end of context
+        else if ((int)c == 3) {printf("ctrl-c\n");return -2;}// end of context
         else if ((int)c == 127) // backspace
         {
             if (buffer_id != 0) buffer_id--;

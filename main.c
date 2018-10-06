@@ -11,16 +11,27 @@
 #include "parse.h"
 #include "execute.h"
 
-void handler(int sig_num) {
+static int sigint = 0;
+
+static void sigHandler(int sig_num) {
     (void)sig_num;
+    sigint = 1;
 }
 
 int main()
 {
-    signal(SIGINT,handler);
+    struct sigaction sa;
+    memset(&sa, 0, sizeof(struct sigaction));
+    sa.sa_handler = sigHandler;
+    sa.sa_flags = 0;// not SA_RESTART!;
+
+    sigaction(SIGINT, &sa, NULL);
+    sigaction(SIGTERM, &sa, NULL);
+
     while (1)
     {
-        char inputcommand[MAX_CL_LEN];
+        char inputcommand[MAX_CL_LEN] = {0};
+        if (sigint) {fflush(stdout);printf("\n");fflush(stdout);sigint=0;}
         printf("mumsh $ ");
         fflush(stdout);
         int len = getCommand(inputcommand);

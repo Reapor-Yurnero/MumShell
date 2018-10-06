@@ -38,7 +38,7 @@ int executejobs(jobs_t* jobs)
         pipe(fd);
         out = (i == jobs->p_num - 1) ? STDOUT_FILENO : fd[1];
         // printf("executing process[%d]\n", i);
-        int rtn = executeprocess(p, in, out, fd);
+        int rtn = executeprocess(p, in, out, fd, jobs->p_num);
         in = fd[0];
         close(fd[1]); // ???
         //close(fd[0]);
@@ -47,7 +47,7 @@ int executejobs(jobs_t* jobs)
     return 0;
 }
 
-int executeprocess(const process_t* p, int in, int out, int* fd) {
+int executeprocess(const process_t* p, int in, int out, int* fd, int pnum) {
     pid_t pid = fork();
     if (pid < 0) {
         perror("failed to fork subprocess");
@@ -126,8 +126,14 @@ int executeprocess(const process_t* p, int in, int out, int* fd) {
             // wait all child process to terminate at the end of jobs
             int wstatus;
             // printf("parent waiting..\n");
-            while (waitpid(-1,&wstatus,0) != -1);
+            for (int j = 0; j < pnum;++j) wait(&wstatus);
+            // (void)pnum;
+            // while (waitpid(-1,&wstatus,0) != -1);
+            usleep(10000);
             // printf("parent ends waiting\n");
+            for (int i = 3;i <= fd[1];++i) {
+                close(i);
+            }
         }
         // else printf("parent nothing to do\n");
     }

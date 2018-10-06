@@ -13,10 +13,10 @@ void initprocess(process_t* p) {
     p->argc=0;
     p->inMode = STDIN;
     p->outMode = STDOUT;
-    for (int i = 0; i < MAX_ARG_NUM;i++) p->argv[i]=(char*)malloc(MAX_ARG_LEN);
-    p->inFile = (char*)malloc(64);
+    for (int i = 0; i < MAX_ARG_NUM;++i) p->argv[i]=(char*)malloc(MAX_ARG_LEN);
+    p->inFile = (char*)malloc(MAX_ARG_LEN);
     //p->inFile = "nofile";
-    p->outFile = (char*)malloc(64);
+    p->outFile = (char*)malloc(MAX_ARG_LEN);
     //p->outFile = "nofile";
 }
 
@@ -192,7 +192,7 @@ void freejobs(jobs_t* jobs) {
 }
 
 void freeprocess(process_t* p) {
-    for (int i = 0; i < MAX_ARG_NUM;i++) free(p->argv[i]);
+    for (int i = 0; i < MAX_ARG_NUM;++i) free(p->argv[i]);
     free(p->inFile);
     free(p->outFile);
 }
