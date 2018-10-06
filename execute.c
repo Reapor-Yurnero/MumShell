@@ -8,6 +8,7 @@
 #include <stdbool.h>
 #include <unistd.h>
 #include <signal.h>
+#include <sys/wait.h>
 #include <fcntl.h>
 /* Not technically required, but needed on some UNIX distributions */
 #include <sys/types.h>
@@ -83,7 +84,7 @@ int executeprocess(const process_t* p, int in, int out, int* fd) {
             else dup2(ifile, STDIN_FILENO);
         }
         if (p->outMode == FILEOUT) {
-            ofile = open(p->outFile, O_WRONLY | O_CREAT | O_TRUNC);
+            ofile = open(p->outFile, O_WRONLY | O_CREAT | O_TRUNC, 0666);
             if (ofile < 0) {
                 perror("write output file failed.");
                 //return -1;
@@ -91,7 +92,7 @@ int executeprocess(const process_t* p, int in, int out, int* fd) {
             else dup2(ofile, STDOUT_FILENO);
         }
         else if (p->outMode == FILEAPPEND) {
-            ofile = open(p->outFile, O_WRONLY | O_CREAT | O_APPEND);
+            ofile = open(p->outFile, O_WRONLY | O_CREAT | O_APPEND, 0666);
             if (ofile < 0) {
                 perror("append output file failed.");
                 //return -1;

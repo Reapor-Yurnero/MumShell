@@ -25,7 +25,7 @@ int main()
         fflush(stdout);
         int len = getCommand(inputcommand);
         //printf("%d\n",len);
-        if (len == -1) return 0;
+        if (len == -1) {printf("exit\n");exit(0);}
         else if (len <= 0) continue;
         jobs_t jobs;
         int rtn = parseCommandLine(inputcommand,len,&jobs);
@@ -36,9 +36,10 @@ int main()
         // displayjobs(&jobs);
         // printf("=======================\n");
         rtn = executejobs(&jobs);
-        if (rtn == -100) exit(0);
+        if (rtn == -100) {printf("exit\n");exit(0);}
         //else if (rtn < 0) continue;
         freejobs(&jobs);
         //break;
     }
+    //return 0;
 }

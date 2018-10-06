@@ -16,19 +16,19 @@ int getCommand(char* commandline)
 {
     char buffer[MAX_CL_LEN];
     unsigned int buffer_id = 0;
-    char c;
+    int c;
     bool singlequoted = false, doublequoted = false;
     while (true) {
-        ssize_t readrtn = read(STDOUT_FILENO, &c, 1);
-        if (readrtn == 0) {
-
+        //ssize_t readrtn = read(STDOUT_FILENO, &c, 1);
+        c = getchar();
+        if ((int)c == EOF) {
 //            fflush(stdout);
-//            printf("\n");
-//            if (buffer_id == 0) {
-//                printf("\n");
-//                return -1;
-//            }
-//            else continue;
+            //printf("EOF\n");
+            if (buffer_id == 0) {
+                printf("\n");
+                return -1;
+            }
+            else continue;
         } // end of transmission
         else if ((int)c == 3) return -2; // end of context
         else if ((int)c == 127) // backspace
@@ -36,7 +36,7 @@ int getCommand(char* commandline)
             if (buffer_id != 0) buffer_id--;
             continue;
         }
-        else buffer[buffer_id++] = c;
+        else buffer[buffer_id++] = (char)c;
         // detect single/double quotes
         singlequoted ^= !doublequoted && (c == '\'');
         doublequoted ^= !singlequoted && (c == '\"');

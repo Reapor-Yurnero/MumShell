@@ -185,10 +185,10 @@ void freejobs(jobs_t* jobs) {
     for (int i = 0;i < jobs->p_num;++i) {
         freeprocess(&jobs->process[i]);
     }
-};
+}
 
 void freeprocess(process_t* p) {
     for (int i = 0; i < MAX_ARG_NUM;i++) free(p->argv[i]);
     free(p->inFile);
     free(p->outFile);
-};
+}
