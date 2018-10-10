@@ -158,9 +158,10 @@ int parseProcess(char* inputCommand, int c_start, int c_end, process_t* p)
             }
         }
     }
-    p->bak = p->argv[p->argc];
+    //p->bak = p->argv[p->argc];
+    free(p->argv[p->argc]);
     p->argv[p->argc] = NULL;
-    p->null_id = p->argc;
+    //p->null_id = p->argc;
     return 0;
 }
 
@@ -199,7 +200,7 @@ void freejobs(jobs_t* jobs) {
 void freeprocess(process_t* p) {
     // printf("freeprocess!\n");
     // back up the changed NULL
-    if (p->argv[p->null_id] == NULL) p->argv[p->null_id] = p->bak;
+    // if (p->argv[p->null_id] == NULL) p->argv[p->null_id] = p->bak;
     for (int i = 0;i < MAX_ARG_NUM;++i) free(p->argv[i]);
     free(p->inFile);
     free(p->outFile);
