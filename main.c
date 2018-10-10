@@ -13,18 +13,20 @@
 
 static int sigint = 0;
 
+// function handler for sigint
 static void sigHandler(int sig_num) {
     (void)sig_num;
+    // set a flag which will start a new line
     sigint = 1;
 }
 
 int main()
 {
+    // parent process handle the SIGINT signal not to exit
     struct sigaction sa;
     memset(&sa, 0, sizeof(struct sigaction));
     sa.sa_handler = sigHandler;
-    sa.sa_flags = 0;// not SA_RESTART! in this case, getchar will throw error
-
+    sa.sa_flags = 0;// not SA_RESTART! in this case, getchar will throw error and thus enter the next iteration in read
     sigaction(SIGINT, &sa, NULL);
     sigaction(SIGTERM, &sa, NULL);
 
