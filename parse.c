@@ -71,8 +71,8 @@ int parseProcess(char* inputCommand, int c_start, int c_end, process_t* p)
     int ifname_id = 0, ofname_id = 0, argv_id = 0;
     for (int i = c_start;i < c_end;++i) {
         c = inputCommand[i];
-        singlequoted ^= !doublequoted && (c == '\'');
-        doublequoted ^= !singlequoted && (c == '\"');
+        //singlequoted ^= !doublequoted && (c == '\'');
+        //doublequoted ^= !singlequoted && (c == '\"');
         quoted = singlequoted || doublequoted;
         if (!quoted)
         {
@@ -118,8 +118,16 @@ int parseProcess(char* inputCommand, int c_start, int c_end, process_t* p)
                 ifiledes &= false; p->inFile[ifname_id] = '\0';
                 ofiledes &= false; p->outFile[ofname_id] = '\0';
             }
-            else if (c == '\'' || c== '\"') {
+            else if (c == '\'') {
                 // TODO: handle quotes details
+                singlequoted = true;
+                if (p->argc == 0) {++p->argc;argv_id=0;}
+                continue;
+            }
+            else if (c == '\"') {
+                doublequoted = true;
+                if (p->argc == 0) {++p->argc;argv_id=0;}
+                continue;
             }
             else {
                 if (ifilenotfound) {ifilenotfound = false;ifiledes = true;}
@@ -149,12 +157,50 @@ int parseProcess(char* inputCommand, int c_start, int c_end, process_t* p)
         }
         else { // quoted
             // TODO: consider quotes follow a redirect
-            if (c == '\'' || c == '\"') {
+            if (c == '\'' && singlequoted) {
+                singlequoted &= false;
+                if (i == c_end-1) {
+                    ifiledes &= false; p->inFile[ifname_id] = '\0';
+                    ofiledes &= false; p->outFile[ofname_id] = '\0';
+                    p->argv[p->argc-1][argv_id] = '\0';
+                    if (ifilenotfound || ofilenotfound) {
+                        perror("syntax error near unexpected token `newline'");
+                        return -1;
+                    }
+                }
+                continue;
+            }
+            else if (c == '\"' && doublequoted) {
+                doublequoted &= false;
+                if (i == c_end-1) {
+                    ifiledes &= false; p->inFile[ifname_id] = '\0';
+                    ofiledes &= false; p->outFile[ofname_id] = '\0';
+                    p->argv[p->argc-1][argv_id] = '\0';
+                    if (ifilenotfound || ofilenotfound) {
+                        perror("syntax error near unexpected token `newline'");
+                        return -1;
+                    }
+                }
                 continue;
             }
             else {
-                if (p->argc == 0) {++p->argc;argv_id=0;}
+                if (ifilenotfound) {ifilenotfound = false;ifiledes = true;}
+                else if (ofilenotfound) {ofilenotfound = false;ofiledes = true;}
+
+                if (ifiledes) {
+                    p->inFile[ifname_id++] = c;
+                }
+                else if (ofiledes) {
+                    p->outFile[ofname_id++] = c;
+                }
+                else {
+                    if (p->argc == 0) {
+                        ++p->argc;
+                        argv_id=0;
+                    }
                 p->argv[p->argc-1][argv_id++] = c;
+                }
+                // no need to check the end of input here
             }
         }
     }

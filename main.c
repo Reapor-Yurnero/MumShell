@@ -37,6 +37,7 @@ int main()
         printf("mumsh $ ");
         fflush(stdout);
         int len = getCommand(inputcommand);
+        //printf("%s\n", inputcommand);
         //printf("%d\n",len);
         if (len == -1) {printf("exit\n");exit(0);}
         else if (len <= 0) continue;
