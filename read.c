@@ -17,11 +17,13 @@ int getCommand(char* commandline)
     char buffer[MAX_CL_LEN] = {0};
     unsigned int buffer_id = 0;
     int c;
-    bool singlequoted = false, doublequoted = false;
+    bool singlequoted = false, doublequoted = false,
+    pipe_found = true, redirect_found = true;
     while (true) {
         //ssize_t readrtn = read(STDOUT_FILENO, &c, 1);
         c = getchar();
         if ((int)c == EOF) {
+            // ctrl-d
             if (feof(stdin)) {
                 if (buffer_id == 0) {
                     //printf("\n");
@@ -29,6 +31,7 @@ int getCommand(char* commandline)
                 }
                 else continue;
             }
+            // ctrl-c
             else if(ferror(stdin)) return -2;
 //            fflush(stdout);
             //printf("EOF\n");
@@ -48,9 +51,19 @@ int getCommand(char* commandline)
         // detect single/double quotes
         singlequoted ^= !doublequoted && (c == '\'');
         doublequoted ^= !singlequoted && (c == '\"');
+        if (c == '>' || c == '<') {
+            redirect_found = false;
+        }
+        else if (!redirect_found) {
+            if (c != ' ' && c!= '\n') redirect_found = true;
+        }
+        if (c == '|') {
+            pipe_found = false;
+        }
+        else if (!pipe_found && c!= ' ' && c!='\n') pipe_found = true;
         if (c == '\n')
         {
-            if (singlequoted || doublequoted )
+            if (singlequoted || doublequoted || !pipe_found || !redirect_found)
             {
                 printf("\r\33[K> ");
                 fflush(stdout);
