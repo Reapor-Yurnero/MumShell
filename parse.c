@@ -67,7 +67,8 @@ int parseProcess(char* inputCommand, int c_start, int c_end, process_t* p)
     char c;
     bool singlequoted = false, doublequoted = false,
     quoted, ifilenotfound = false, ifiledes = false,
-    ofilenotfound = false, ofiledes = false;
+    ofilenotfound = false, ofiledes = false,
+    ired_flag = false, ored_flag = false;
     int ifname_id = 0, ofname_id = 0, argv_id = 0;
     for (int i = c_start;i < c_end;++i) {
         c = inputCommand[i];
@@ -101,6 +102,12 @@ int parseProcess(char* inputCommand, int c_start, int c_end, process_t* p)
 //                    perror("syntax error near unexpected token `newline'");
 //                    return -1;
 //                }
+                if (!ired_flag) ired_flag = true;
+                else {
+                    printf("error: duplicated input redirection\n");
+                    fflush(stdout);
+                    return -1;
+                }
                 p->inMode = FILEIN;
                 ifilenotfound = true;
                 ifiledes &= false; p->inFile[ifname_id] = '\0';
@@ -111,10 +118,18 @@ int parseProcess(char* inputCommand, int c_start, int c_end, process_t* p)
 //                    perror("syntax error near unexpected token `newline'");
 //                    return -1;
 //                }
+                if (!ored_flag) ored_flag = true;
+                else {
+                    printf("error: duplicated output redirection\n");
+                    fflush(stdout);
+                    return -1;
+                }
+                (void) ored_flag;
                 if (i != c_end-1 && inputCommand[i+1] == '>')
                 {p->outMode = FILEAPPEND;++i;}
                 else p->outMode = FILEOUT;
                 ofilenotfound = true;
+                ored_flag = true;
                 ifiledes &= false; p->inFile[ifname_id] = '\0';
                 ofiledes &= false; p->outFile[ofname_id] = '\0';
             }
@@ -149,8 +164,12 @@ int parseProcess(char* inputCommand, int c_start, int c_end, process_t* p)
                 ifiledes &= false; p->inFile[ifname_id] = '\0';
                 ofiledes &= false; p->outFile[ofname_id] = '\0';
                 p->argv[p->argc-1][argv_id] = '\0';
-                if (ifilenotfound || ofilenotfound) {
-                    perror("syntax error near unexpected token `newline'");
+                if (ifilenotfound) {
+                    perror("syntax error near unexpected token `<'");
+                    return -1;
+                }
+                else if (ofilenotfound) {
+                    perror("syntax error near unexpected token `>'");
                     return -1;
                 }
             }
@@ -163,8 +182,12 @@ int parseProcess(char* inputCommand, int c_start, int c_end, process_t* p)
                     ifiledes &= false; p->inFile[ifname_id] = '\0';
                     ofiledes &= false; p->outFile[ofname_id] = '\0';
                     p->argv[p->argc-1][argv_id] = '\0';
-                    if (ifilenotfound || ofilenotfound) {
-                        perror("syntax error near unexpected token `newline'");
+                    if (ifilenotfound) {
+                        perror("syntax error near unexpected token `<'");
+                        return -1;
+                    }
+                    else if (ofilenotfound) {
+                        perror("syntax error near unexpected token `>'");
                         return -1;
                     }
                 }
@@ -176,8 +199,12 @@ int parseProcess(char* inputCommand, int c_start, int c_end, process_t* p)
                     ifiledes &= false; p->inFile[ifname_id] = '\0';
                     ofiledes &= false; p->outFile[ofname_id] = '\0';
                     p->argv[p->argc-1][argv_id] = '\0';
-                    if (ifilenotfound || ofilenotfound) {
-                        perror("syntax error near unexpected token `newline'");
+                    if (ifilenotfound) {
+                        perror("syntax error near unexpected token `<'");
+                        return -1;
+                    }
+                    else if (ofilenotfound) {
+                        perror("syntax error near unexpected token `>'");
                         return -1;
                     }
                 }
@@ -201,6 +228,7 @@ int parseProcess(char* inputCommand, int c_start, int c_end, process_t* p)
                 p->argv[p->argc-1][argv_id++] = c;
                 }
                 // no need to check the end of input here
+                // since quotes must be in pair
             }
         }
     }

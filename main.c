@@ -16,7 +16,7 @@ static int sigint = 0;
 // function handler for sigint
 static void sigHandler(int sig_num) {
     (void)sig_num;
-    // set a flag which will start a new line
+    // set a flag which will trigger a new line
     sigint = 1;
 }
 

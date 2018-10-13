@@ -10,6 +10,7 @@
 #include <signal.h>
 #include <sys/wait.h>
 #include <fcntl.h>
+#include <errno.h>
 /* Not technically required, but needed on some UNIX distributions */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -59,6 +60,12 @@ int executeprocess(const process_t* p, int in, int out, int* fd, jobs_t* jobs) {
         close(fd[0]); // subprocess always don't need new pipe for read
         //printf("pipe connect %s\n",p->argv[0]);
         if (in != STDIN_FILENO) {
+            if (p->inMode == FILEIN) {
+                printf("error: duplicated input redirection\n");
+                close(in);close(fd[1]);close(STDIN_FILENO);
+                freejobs(jobs);
+                exit(-1);
+            }
             close(STDIN_FILENO);
             dup2(in, STDIN_FILENO);
             close(in);
@@ -66,6 +73,12 @@ int executeprocess(const process_t* p, int in, int out, int* fd, jobs_t* jobs) {
         }
         if (out == STDOUT_FILENO) close(fd[1]);// printf("%d %d\n",fd[0],fd[1]);
         else { // out == fd[1]
+            if (p->outMode == FILEOUT || p->outMode == FILEAPPEND) {
+                printf("error: duplicated output redirection\n");
+                close(out);close(STDOUT_FILENO);
+                freejobs(jobs);
+                exit(-1);
+            }
             // printf("%s out=%d\n",p->argv[0], out);
             close(STDOUT_FILENO);
             dup2(out, STDOUT_FILENO);
@@ -119,8 +132,12 @@ int executeprocess(const process_t* p, int in, int out, int* fd, jobs_t* jobs) {
             int rtn = execvp(p->argv[0],p->argv);
             // printf("command finished\n");
             if (rtn < 0) {
+                int errnum = errno;
+                if (errnum == ENOENT) printf("%s: command not found\n",p->argv[0]);
+                else perror(p->argv[0]);
+                fflush(stdout);
                 freejobs(jobs);
-                perror("failed to execute");
+                //
                 exit(rtn);
             }
         }
