@@ -63,9 +63,14 @@ int getCommand(char* commandline)
         else if (!pipe_found && c!= ' ' && c!='\n') pipe_found = true;
         if (c == '\n')
         {
-            if (singlequoted || doublequoted || !pipe_found || !redirect_found)
+            if (singlequoted || doublequoted)
             {
-                printf("\r\33[K> ");
+                printf("> ");
+                fflush(stdout);
+                //buffer_id--;
+            }
+            else if (!pipe_found || !redirect_found) {
+                printf("> ");
                 fflush(stdout);
                 buffer_id--;
             }

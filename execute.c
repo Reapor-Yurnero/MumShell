@@ -30,7 +30,7 @@ int executejobs(jobs_t* jobs)
             if (p->argc < 2) continue;
             else if (chdir(p->argv[1]) < 0) {
                 //TODO: improve the error
-                perror("cd: invalid path");
+                perror(p->argv[1]);
             }
             continue;
         }
@@ -78,24 +78,33 @@ int executeprocess(const process_t* p, int in, int out, int* fd, jobs_t* jobs) {
         if (p->inMode == FILEIN) {
             ifile = open(p->inFile, O_RDONLY);
             if (ifile < 0) {
-                perror("read input file failed.");
+                perror(p->inFile);
                 //return -1;
+                close(ifile);
+                freejobs(jobs);
+                exit(ifile);
             }
             else dup2(ifile, STDIN_FILENO);
         }
         if (p->outMode == FILEOUT) {
             ofile = open(p->outFile, O_WRONLY | O_CREAT | O_TRUNC, 0666);
             if (ofile < 0) {
-                perror("write output file failed.");
+                perror(p->outFile);
                 //return -1;
+                close(ofile);
+                freejobs(jobs);
+                exit(ofile);
             }
             else dup2(ofile, STDOUT_FILENO);
         }
         else if (p->outMode == FILEAPPEND) {
             ofile = open(p->outFile, O_WRONLY | O_CREAT | O_APPEND, 0666);
             if (ofile < 0) {
-                perror("append output file failed.");
+                perror(p->outFile);
                 //return -1;
+                close(ofile);
+                freejobs(jobs);
+                exit(ofile);
             }
             else dup2(ofile, STDOUT_FILENO);
         }
