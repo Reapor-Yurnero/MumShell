@@ -7,6 +7,7 @@
 
 #include "parse.h"
 #include "para.h"
+#include <stdbool.h>
 
 int executejobs(jobs_t* jobs);
 

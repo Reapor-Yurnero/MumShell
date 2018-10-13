@@ -43,7 +43,9 @@ int executejobs(jobs_t* jobs)
         in = fd[0];
         close(fd[1]); // ???
         //close(fd[0]);
-        if (rtn != 0) return rtn;
+        if (rtn != 0) {
+            return rtn;
+        }
     }
     return 0;
 }
@@ -61,7 +63,7 @@ int executeprocess(const process_t* p, int in, int out, int* fd, jobs_t* jobs) {
         //printf("pipe connect %s\n",p->argv[0]);
         if (in != STDIN_FILENO) {
             if (p->inMode == FILEIN) {
-                printf("error: duplicated input redirection\n");
+                //printf("error: duplicated input redirection\n");
                 close(in);close(fd[1]);close(STDIN_FILENO);
                 freejobs(jobs);
                 exit(-1);
@@ -74,7 +76,7 @@ int executeprocess(const process_t* p, int in, int out, int* fd, jobs_t* jobs) {
         if (out == STDOUT_FILENO) close(fd[1]);// printf("%d %d\n",fd[0],fd[1]);
         else { // out == fd[1]
             if (p->outMode == FILEOUT || p->outMode == FILEAPPEND) {
-                printf("error: duplicated output redirection\n");
+                //printf("error: duplicated output redirection\n");
                 close(out);close(STDOUT_FILENO);
                 freejobs(jobs);
                 exit(-1);
@@ -91,7 +93,10 @@ int executeprocess(const process_t* p, int in, int out, int* fd, jobs_t* jobs) {
         if (p->inMode == FILEIN) {
             ifile = open(p->inFile, O_RDONLY);
             if (ifile < 0) {
-                perror(p->inFile);
+                int errnum = errno;
+                if (errnum == EACCES) printf("%s: Permission denied\n", p->inFile);
+                else perror(p->inFile);
+                fflush(stdout);
                 //return -1;
                 close(ifile);
                 freejobs(jobs);
@@ -102,8 +107,12 @@ int executeprocess(const process_t* p, int in, int out, int* fd, jobs_t* jobs) {
         if (p->outMode == FILEOUT) {
             ofile = open(p->outFile, O_WRONLY | O_CREAT | O_TRUNC, 0666);
             if (ofile < 0) {
-                perror(p->outFile);
-                //return -1;
+                //int errnum = errno;
+                //printf("%d\n",errnum);
+                printf("%s: Permission denied\n", p->outFile);
+                //else perror(p->outFile);
+                fflush(stdout);
+                // return -1
                 close(ofile);
                 freejobs(jobs);
                 exit(ofile);
@@ -150,6 +159,14 @@ int executeprocess(const process_t* p, int in, int out, int* fd, jobs_t* jobs) {
         exit(0);
     }
     else { // parent process
+        if (out != STDOUT_FILENO && (p->outMode == FILEOUT || p->outMode == FILEAPPEND)) {
+            printf("error: duplicated output redirection\n");
+            return -1;
+        }
+        if (in != STDIN_FILENO && p->inMode == FILEIN) {
+            printf("error: duplicated input redirection\n");
+            return -1;
+        }
         if (out == STDOUT_FILENO) {
             // wait all child process to terminate at the end of jobs
             int wstatus;
