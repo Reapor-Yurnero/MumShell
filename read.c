@@ -12,7 +12,7 @@
 
 // the read process of input command
 // handles the uncompleted quote
-int getCommand(char* commandline)
+int getCommand(char* commandline, bool* background)
 {
     char buffer[MAX_CL_LEN] = {0};
     int buffer_id = 0;
@@ -54,6 +54,10 @@ int getCommand(char* commandline)
         // detect single/double quotes
         singlequoted ^= !doublequoted && (c == '\'');
         doublequoted ^= !singlequoted && (c == '\"');
+        // detect & background
+        if (!singlequoted && !doublequoted && c == '&') {
+            *background = true;
+        }
         // detect > <
         if (c == '>') {
             // not the first time of > and adjacent to last >

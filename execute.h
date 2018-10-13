@@ -11,6 +11,8 @@
 
 int executejobs(jobs_t* jobs);
 
-int executeprocess(const process_t* p, int in, int out, int* fd, jobs_t* jobs);
+int executeprocess(process_t* p, int in, int out, int* fd, jobs_t* jobs);
+
+void reapechildren(jobs_t* jobs);
 
 #endif //PROJECT_EXECUTE_H

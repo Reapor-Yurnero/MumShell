@@ -5,6 +5,8 @@
 #ifndef PROJECT_READ_H
 #define PROJECT_READ_H
 
-int getCommand(char* commandline);
+#include <stdbool.h>
+
+int getCommand(char* commandline, bool* background);
 
 #endif //PROJECT_READ_H

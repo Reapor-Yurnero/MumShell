@@ -22,7 +22,7 @@ int executejobs(jobs_t* jobs)
     int in = STDIN_FILENO, out;
     for (int i = 0;i < jobs->p_num;++i)
     {
-        const process_t * p = &jobs->process[i];
+        process_t * p = &jobs->process[i];
         char* command = NULL;
         if (p->argc > 0) command = p->argv[0];
         else continue; // we ensure that valid (argc>=1) process will be executed
@@ -50,7 +50,7 @@ int executejobs(jobs_t* jobs)
     return 0;
 }
 
-int executeprocess(const process_t* p, int in, int out, int* fd, jobs_t* jobs) {
+int executeprocess(process_t* p, int in, int out, int* fd, jobs_t* jobs) {
     pid_t pid = fork();
     if (pid < 0) {
         perror("failed to fork subprocess");
@@ -159,6 +159,7 @@ int executeprocess(const process_t* p, int in, int out, int* fd, jobs_t* jobs) {
         exit(0);
     }
     else { // parent process
+        p->pid = pid;
         if (out != STDOUT_FILENO && (p->outMode == FILEOUT || p->outMode == FILEAPPEND)) {
             printf("error: duplicated output redirection\n");
             return -1;
@@ -167,20 +168,31 @@ int executeprocess(const process_t* p, int in, int out, int* fd, jobs_t* jobs) {
             printf("error: duplicated input redirection\n");
             return -1;
         }
-        if (out == STDOUT_FILENO) {
-            // wait all child process to terminate at the end of jobs
-            int wstatus;
-            // printf("parent waiting..\n");
-            for (int j = 0; j < jobs->p_num;++j) wait(&wstatus);
-            // (void)pnum;
-            // while (waitpid(-1,&wstatus,0) != -1);
-            usleep(10000);
-            // printf("parent ends waiting\n");
-            for (int i = 3;i <= fd[1];++i) {
-                close(i);
+        if (!jobs->background) {
+            if (out == STDOUT_FILENO) { // the last child process
+                // wait all child process to terminate at the end of jobs
+                int wstatus;
+                // printf("parent waiting..\n");
+                for (int j = 0; j < jobs->p_num;++j) wait(&wstatus);
+                // (void)pnum;
+                // while (waitpid(-1,&wstatus,0) != -1);
+                usleep(10000);
+                // printf("parent ends waiting\n");
+                for (int i = 3;i <= fd[1];++i) {
+                    close(i);
+                }
             }
         }
         // else printf("parent nothing to do\n");
     }
     return 0;
+}
+
+void reapechildren(jobs_t* jobs) {
+    for (int i = 0; i < jobs->p_num; ++i) {
+        if (jobs->process[i].pid != -1) {
+            int wstatus;
+            waitpid(jobs->process[i].pid, &wstatus, 0);
+        }
+    }
 }

@@ -5,11 +5,14 @@
 #define PROJECT_PARSE_H
 
 #include "para.h"
+#include <stdbool.h>
+#include <sys/types.h>
 
 enum IOMode {STDIN, STDOUT, FILEIN, FILEOUT, FILEAPPEND};
 
 typedef struct process_t process_t;
 struct process_t {
+    pid_t pid;
     int argc;
     char* argv[MAX_ARG_NUM];
     char* inFile;
@@ -22,6 +25,8 @@ struct process_t {
 
 typedef struct jobs_t jobs_t;
 struct jobs_t {
+    bool background;
+    char name[MAX_CL_LEN];
     int p_num;
     process_t process[MAX_PIPE_NUM];
 };
@@ -32,6 +37,7 @@ int parseCommandLine(char* inputCommand, int c_len, jobs_t* jobs);
 int parseProcess(char* inputCommand, int c_start, int c_end, process_t* p);
 void displayjobs(const jobs_t* jobs);
 void displayprocess(const process_t* p);
+void freejobslist(jobs_t* jobslist, int size);
 void freejobs(jobs_t* jobs);
 void freeprocess(process_t* p);
 

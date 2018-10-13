@@ -11,6 +11,7 @@
 
 void initprocess(process_t* p) {
     //printf("initprocess!\n");
+    p->pid = -1;
     p->argc=0;
     p->inMode = STDIN;
     p->outMode = STDOUT;
@@ -21,9 +22,24 @@ void initprocess(process_t* p) {
 
 int parseCommandLine(char* inputCommand, int c_len, jobs_t* jobs)
 {
+    // initialization
+    if (jobs->background == true) {
+        strcpy(jobs->name, inputCommand);
+        if (jobs->name[c_len] == '\n') jobs->name[c_len] = '\0';
+    }
     jobs->p_num = 0;
     char c;
     bool singlequoted = false, doublequoted = false, quoted;
+    for (int i = 0; i < c_len; ++i) {
+        c = inputCommand[i];
+        singlequoted ^= !doublequoted && (c == '\'');
+        doublequoted ^= !singlequoted && (c == '\"');
+        if (!singlequoted && !doublequoted && c == '&') {
+            c_len = i; break;
+        }
+    }
+    //printf("%d\n",c_len);
+    singlequoted = false, doublequoted = false;
     int c_start = 0, c_end = 0;
     for (int i = 0; i < c_len; ++i)
     {
@@ -261,6 +277,12 @@ void displayprocess(const process_t* p) {
     if (p->outMode != 1)
         printf("outMode: %d outFile: %s\n",p->outMode, p->outFile);
     else printf("outMode: %d\n",p->outMode);
+}
+
+void freejobslist(jobs_t* jobslist, int size) {
+    for (int i = 0; i < size; ++i ) {
+        freejobs(&jobslist[i]);
+    }
 }
 
 void freejobs(jobs_t* jobs) {
