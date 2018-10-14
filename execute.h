@@ -15,4 +15,8 @@ int executeprocess(process_t* p, int in, int out, int* fd, jobs_t* jobs);
 
 void reapechildren(jobs_t* jobs);
 
+void showjobslist(jobs_t* jobslist, int size);
+
+int verifyjobs(jobs_t* jobs);
+
 #endif //PROJECT_EXECUTE_H

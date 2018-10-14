@@ -70,8 +70,8 @@ int main()
             }
             continue;
         }
-        // displayjobs(&jobs);
-        // printf("=======================\n");
+        //displayjobs(&jobs);
+        //printf("=======================\n");
         if (background) {
             printf("[%d] %s\n", bgjobs_id+1, bgjobslist[bgjobs_id].name);
             fflush(stdout);
@@ -84,6 +84,9 @@ int main()
             freejobs(&jobs);
             printf("exit\n");
             exit(0);
+        }
+        else if (rtn == -50) {
+            showjobslist(bgjobslist,bgjobs_id);
         }
         //else if (rtn < 0) continue;
         freejobs(&jobs);
