@@ -1,5 +1,5 @@
-# Shell
-A self written shell for VE482 project 1
+# MumShell
+A home-made shell for VE482 project 1.
 
 ## Supported Functions (150/150)
 
